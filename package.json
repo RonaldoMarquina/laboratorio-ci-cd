@@ -1,0 +1,16 @@
+{
+  "name": "laboratorio-ci-cd",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"(Sin pruebas todavía)\" && exit 0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2" // La versión de express puede variar, no hay problema
+  }
+}
