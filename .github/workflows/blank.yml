@@ -1,0 +1,56 @@
+name: CI - Node.js
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install deps
+        run: npm ci
+        # Si no tienes package-lock.json aún, usa: npm install
+
+      - name: Lint (opcional)
+        run: |
+          if npm run lint &>/dev/null; then
+            npm run lint
+          else
+            echo "No hay script lint, se omite."
+          fi
+
+      - name: Test (si existe script)
+        run: |
+          TEST_SCRIPT=$(node -p "require('./package.json').scripts?.test || ''")
+          if [ -n "$TEST_SCRIPT" ] && ! echo "$TEST_SCRIPT" | grep -qi "no test specified"; then
+            npm test
+          else
+            echo "No hay pruebas definidas, se omite."
+          fi
+
+      - name: Seguridad básica (npm audit, no falla el build)
+        continue-on-error: true
+        run: npm audit --audit-level=high
+
+      - name: Empaquetar artifact (excluye node_modules)
+        run: |
+          git archive --format=tar.gz -o mi-primera-app.tar.gz HEAD
+
+      - name: Subir artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mi-primera-app
+          path: mi-primera-app.tar.gz
